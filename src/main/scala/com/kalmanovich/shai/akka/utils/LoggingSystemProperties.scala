@@ -4,6 +4,6 @@ import com.typesafe.config.ConfigFactory
 
 object LoggingSystemProperties {
 
-  val storeMessageTimeInterval = ConfigFactory.load().getString(Consts.STORE_MESSAGES_TIME_INTERVAL_KEY)
+  lazy val storeMessageTimeInterval = ConfigFactory.load().getString(Consts.STORE_MESSAGES_TIME_INTERVAL_KEY)
 
 }
