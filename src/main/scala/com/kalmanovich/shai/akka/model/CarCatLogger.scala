@@ -11,7 +11,7 @@ class CarCatLogger() {
 
   def write() = {
     messagesList.map(msg => println(s"msg is: $msg"))
-    messagesList.clear //= ListBuffer.empty
+    messagesList.clear
   }
 
 }
