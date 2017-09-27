@@ -19,43 +19,42 @@ class LoggingActorSpec (_system: ActorSystem) extends TestKit(_system)
   }
 
 
-  "simple finite state machine" should "demonstrate NullFunction" in {
+  "LoggingActor FSM" should "demonstrate NullFunction" in {
     class A extends FSM[Int, Null] {
       val SomeState = 0
       when(SomeState)(FSM.NullFunction)
     }
   }
 
-  "simple finite state machine" should "batch correctly" in {
+  "LoggingActor FSM" should "batch correctly" in {
     val loggingActor = system.actorOf(Props(classOf[LoggingActor]))
     loggingActor ! SetTarget(testActor)
     loggingActor ! Queue(42)
     loggingActor ! Queue(43)
     loggingActor ! Flush
-    expectMsg(Batch(Seq(42, 43)))
+    expectMsg(Write(Seq(42, 43)))
     loggingActor ! Queue(44)
     loggingActor ! Flush
     loggingActor ! Queue(45)
-    expectMsg(Batch(Seq(44)))
+    expectMsg(Write(Seq(44)))
     loggingActor ! Flush
-    expectMsg(Batch(Seq(45)))
+    expectMsg(Write(Seq(45)))
     loggingActor ! Queue(46)
     loggingActor ! Queue(47)
     loggingActor ! Queue(48)
     loggingActor ! Queue(49)
     loggingActor ! Queue(50)
-    expectMsg(Batch(Seq(46, 47, 48, 49, 50)))
+    expectMsg(Write(Seq(46, 47, 48, 49, 50)))
     loggingActor ! Queue(51)
     loggingActor ! Flush
-    expectMsg(Batch(Seq(51)))
+    expectMsg(Write(Seq(51)))
   }
 
-  "simple finite state machine" should  "not batch if uninitialized" in {
+  "LoggingActor FSM" should "not batch if uninitialized" in {
     val loggingActor = system.actorOf(Props(classOf[LoggingActor]))
     loggingActor ! Queue(42)
     loggingActor ! Flush
     expectNoMsg
   }
-
 
 }

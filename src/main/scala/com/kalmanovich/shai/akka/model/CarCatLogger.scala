@@ -2,17 +2,16 @@ package com.kalmanovich.shai.akka.model
 
 import scala.collection.mutable.ListBuffer
 
-class CarCatLogger() {
+trait CarCatLogger {
 
-  val messagesList : ListBuffer[String] = ListBuffer.empty
+  val messagesList: ListBuffer[Any] = ListBuffer.empty
 
-  def addMessage(msg: String) : Unit =
-    messagesList += msg
+  /**
+    * <i>writeMessages</i> - This method writes the messages to the correct output handler.
+    */
+  def writeMessages(): Unit
 
-  def write() = {
-    messagesList.map(msg => println(s"msg is: $msg"))
-    messagesList.clear
-  }
+  def addMessage(msg: Any) = messagesList += msg
 
 }
 

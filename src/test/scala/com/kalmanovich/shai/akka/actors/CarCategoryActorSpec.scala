@@ -1,10 +1,7 @@
 package com.kalmanovich.shai.akka.actors
 
 import akka.actor.ActorSystem
-import akka.testkit.{TestKit, TestProbe}
-import com.kalmanovich.shai.akka.actors.CarCategoryActor.Message
-import com.kalmanovich.shai.akka.model.CarCatLogger
-import org.mockito.Mockito
+import akka.testkit.TestKit
 //import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
@@ -20,7 +17,7 @@ class CarCategoryActorSpec(_system: ActorSystem) extends TestKit(_system)
     shutdown(system)
   }
 
-
+/*
   "CarCatLoggingActor" should "accumulate messages" in {
       val probe: TestProbe = TestProbe()
       val carCatLoggerMock = Mockito.spy(new CarCatLogger)
@@ -46,7 +43,7 @@ class CarCategoryActorSpec(_system: ActorSystem) extends TestKit(_system)
       assert(carCatLoggerMock.messagesList.tail.head == "second2")
 
       system.stop(carCatLoggingActor)
-    }
+    }*/
 /*
   "CarCatLoggingActor" should "accumalate messages and flush" in {
     val probe: TestProbe = TestProbe()

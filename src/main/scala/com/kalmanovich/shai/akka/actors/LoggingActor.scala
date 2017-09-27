@@ -12,7 +12,7 @@ final case class Queue(msg: Any)
 case object Flush
 
 // sent events
-final case class Batch(messages: Seq[Any])
+final case class Write(messages: Seq[Any])
 
 // states
 sealed trait State
@@ -51,41 +51,27 @@ class LoggingActor extends LoggingFSM[State, Data] {
     case Accumulate -> Empty => // This case could happen on timeout, before we have 5 messages
       log.info("inside onTransition Accumulate -> Empty")
       stateData match {
-        case Todo(ref, messages) => ref ! Batch(messages)
+        case Todo(ref, messages) => ref ! Write(messages)
         case _                   => // nothing to do
       }
-
-    case Accumulate -> Accumulate =>
-      log.info("inside onTransition Accumulate -> Accumulate")
-      nextStateData match {
-        case t @ Todo(ref, messages) =>
-          if (messages.size == loggingActorNumOfMessageToFlush) { // we have 5 messages, so need to flush
-            // need to "flush" and write the messages and go back to Empty state
-            ref ! Batch(messages)
-            //goto(Empty) using t.copy(messages = Vector.empty)
-            self ! Flush
-          }
-        case _ => // nothing to do
-      }
   }
-
 
 
   whenUnhandled {
     // common code for both states
     case Event(Queue(msg), t@Todo(_, msgList)) =>
       log.info("inside whenUnhandled first")
-      if (msgList.size == loggingActorNumOfMessageToFlush) { // TODO I was here
-        goto(Empty) using t.copy(messages = Vector.empty)
-      } else {
-        goto(Accumulate) using t.copy(messages = msgList :+ msg)
+      if (msgList.size == loggingActorNumOfMessageToFlush-1) {
+        self ! Flush
       }
+      goto(Accumulate) using t.copy(messages = msgList :+ msg)
 
     case Event(e, s) =>
       log.info("inside whenUnhandled second")
       log.warning("received unhandled request {} in state {}/{}", e, stateName, s)
       stay
   }
+
 
   initialize()
 }
