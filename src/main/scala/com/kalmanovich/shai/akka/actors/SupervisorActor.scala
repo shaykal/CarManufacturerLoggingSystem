@@ -19,17 +19,11 @@ object SupervisorActor {
 
   case object StartHeartBeat
   case class HeartBeat(actorId: ActorId)
-  //case object HeartBeat
-  //case object Alive
   case class Alive(actorId: ActorId)
   case object TimeIsUp
 
-
   case class Queue(actorId: ActorId, msg: Any)
   case class Flush(actorId: ActorId)
-
-  //case class CreateCarCat(logger: CarCatLogger)
-
 }
 
 

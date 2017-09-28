@@ -3,7 +3,6 @@ package com.kalmanovich.shai.akka.actors
 import akka.actor.{Actor, ActorLogging, Props}
 import com.kalmanovich.shai.akka.model.CarCatLogger
 import com.kalmanovich.shai.akka.utils.Consts.ActorId
-//import com.kalmanovich.shai.akka.utils.Consts
 
 /**
   * Created by Shai Kalmanovich on 9/27/2017.
@@ -15,15 +14,12 @@ object WriterActor {
   case class Write(messagesList: Seq[Any])
   case class HeartBeat(actorId: ActorId)
   case class Alive(actorId: ActorId)
-  //case object HeartBeat
-  //case object Alive
 }
 
 class WriterActor(logger: CarCatLogger) extends Actor with ActorLogging{
 
   import WriterActor._
 
-    // TODO put correct dispatcher for non blocking
   override def receive: Receive = {
     case Write(messagesList: Seq[Any]) => {
       log.debug(s"inside Write(id) messagesList is: $messagesList")
