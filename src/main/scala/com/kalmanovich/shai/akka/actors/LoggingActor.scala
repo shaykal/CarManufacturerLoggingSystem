@@ -1,30 +1,36 @@
 package com.kalmanovich.shai.akka.actors
 
 import akka.actor.{ActorRef, LoggingFSM}
+import com.kalmanovich.shai.akka.actors.LoggingActor.{Data, State}
 import com.kalmanovich.shai.akka.utils.LoggingSystemProperties
 
 import scala.concurrent.duration._
 
-// Messages (Events)
-// received events
-final case class SetTarget(ref: ActorRef)
-final case class Queue(msg: Any)
-case object Flush
+object LoggingActor {
 
-// sent events
-final case class Write(messages: Seq[Any])
+  // Messages (Events)
+  // received events
+  final case class SetTarget(ref: ActorRef)
+  final case class Queue(msg: Any)
+  case object Flush
 
-// states
-sealed trait State
-case object Empty extends State
-case object Accumulate extends State
+  // sent events
+  final case class Write(messages: Seq[Any])
 
-// data
-sealed trait Data
-case object Uninitialized extends Data
-final case class Todo(target: ActorRef, messages: Seq[Any]) extends Data
+  // states
+  sealed trait State
+  case object Empty extends State
+  case object Accumulate extends State
 
+  // data
+  sealed trait Data
+  case object Uninitialized extends Data
+  final case class Todo(target: ActorRef, messages: Seq[Any]) extends Data
+
+}
 class LoggingActor extends LoggingFSM[State, Data] {
+
+  import LoggingActor._
 
   lazy val loggingActorExpireTime: Int = LoggingSystemProperties.loggingActorExpireTime.toInt
   lazy val loggingActorNumOfMessageToFlush: Int = LoggingSystemProperties.loggingActorNumOfMessageToFlush.toInt

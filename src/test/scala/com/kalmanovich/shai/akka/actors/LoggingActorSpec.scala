@@ -3,6 +3,7 @@ package com.kalmanovich.shai.akka.actors
 import akka.actor.{ActorSystem, FSM, Props}
 import akka.testkit.TestKit
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
+import LoggingActor._
 
 /**
   * Created by Shai Kalmanovich on 9/26/2017.
@@ -26,7 +27,7 @@ class LoggingActorSpec (_system: ActorSystem) extends TestKit(_system)
     }
   }
 
-  "LoggingActor FSM" should "batch correctly" in {
+  "LoggingActor FSM" should "send write requests correctly" in {
     val loggingActor = system.actorOf(Props(classOf[LoggingActor]))
     loggingActor ! SetTarget(testActor)
     loggingActor ! Queue(42)
