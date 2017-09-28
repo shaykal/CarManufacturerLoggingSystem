@@ -41,21 +41,21 @@ class LoggingActor extends LoggingFSM[State, Data] {
 
   when(Empty) {
     case Event(SetTarget(ref), Uninitialized) =>
-      log.info("inside when Empty first")
+      log.debug("inside when Empty first")
       stay using Todo(ref, Vector.empty)
   }
 
 
   when(Accumulate, stateTimeout = loggingActorExpireTime second) {
     case Event(Flush | StateTimeout, t: Todo) =>
-      log.info("inside when Accumulate second")
+      log.debug("inside when Accumulate second")
       goto(Empty) using t.copy(messages = Vector.empty)
   }
 
 
   onTransition {
     case Accumulate -> Empty => // This case could happen on timeout, before we have 5 messages
-      log.info("inside onTransition Accumulate -> Empty")
+      log.debug("inside onTransition Accumulate -> Empty")
       stateData match {
         case Todo(ref, messages) => ref ! Write(messages)
         case _                   => // nothing to do
@@ -66,14 +66,13 @@ class LoggingActor extends LoggingFSM[State, Data] {
   whenUnhandled {
     // common code for both states
     case Event(Queue(msg), t@Todo(_, msgList)) =>
-      log.info("inside whenUnhandled first")
+      log.debug("inside whenUnhandled first")
       if (msgList.size == loggingActorNumOfMessageToFlush-1) {
         self ! Flush
       }
       goto(Accumulate) using t.copy(messages = msgList :+ msg)
 
     case Event(e, s) =>
-      log.info("inside whenUnhandled second")
       log.warning("received unhandled request {} in state {}/{}", e, stateName, s)
       stay
   }

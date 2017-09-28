@@ -50,11 +50,11 @@ class SupervisorActor extends Actor with Stash with Timers with ActorLogging {
   // creation of the actors
   override def preStart(): Unit = {
     log.info("inside preStart")
-    val dbWriterActor: ActorRef = context.actorOf(WriterActor.props(new CarCatLoggerDBImpl), DB_WRITER_ACTOR_ID)
+    val dbWriterActor: ActorRef = context.actorOf(WriterActor.props(new CarCatLoggerDBImpl).withDispatcher("blocking-io-dispatcher"), DB_WRITER_ACTOR_ID)
     writerActors += (dbWriterActor -> DB_WRITER_ACTOR_ID)
     actorIdToRefMap += (DB_WRITER_ACTOR_ID -> dbWriterActor)
     actorsStillNeedToReply += (dbWriterActor -> DB_WRITER_ACTOR_ID)
-    val fileWriterActor: ActorRef = context.actorOf(WriterActor.props(new CarCatLoggerFileImpl), FILE_WRITER_ACTOR_ID)
+    val fileWriterActor: ActorRef = context.actorOf(WriterActor.props(new CarCatLoggerFileImpl).withDispatcher("blocking-io-dispatcher"), FILE_WRITER_ACTOR_ID)
     writerActors += (fileWriterActor -> FILE_WRITER_ACTOR_ID)
     actorIdToRefMap += (FILE_WRITER_ACTOR_ID -> fileWriterActor)
     actorsStillNeedToReply += (fileWriterActor -> FILE_WRITER_ACTOR_ID)
@@ -78,19 +78,13 @@ class SupervisorActor extends Actor with Stash with Timers with ActorLogging {
       context.become(waitForResults, discardOld = false)
 
     case Queue(actorId, msg) => {
-      log.info(s"inside Queue1(actorId, msg) : actorId is: $actorId msg is: $msg")
-      actorIdToRefMap.get(actorId) match {
-        case Some(ref) => ref ! LoggingActor.Queue(msg)
-        case None => throw new Exception("error")
-      }
+      log.debug(s"inside Queue1(actorId, msg) : actorId is: $actorId msg is: $msg")
+      actorIdToRefMap.get(actorId).map(ref => ref ! LoggingActor.Queue(msg))
     }
 
     case Flush(actorId) => {
-      log.info(s"inside Flush1(actorId, msg) : actorId is: $actorId")
-      actorIdToRefMap.get(actorId) match {
-        case Some(ref) => ref ! LoggingActor.Flush
-        case None => throw new Exception("error")
-      }
+      log.debug(s"inside Flush1(actorId, msg) : actorId is: $actorId")
+      actorIdToRefMap.get(actorId).map(ref => ref ! LoggingActor.Flush)
     }
 
     case msg => stash()
@@ -116,19 +110,19 @@ class SupervisorActor extends Actor with Stash with Timers with ActorLogging {
       actorsStillNeedToReply.foreach(entry => {
         val oldActorRef = entry._1
         val actorId = entry._2
-        log.info(s"oldActorRef is: $oldActorRef, actorId is: $actorId")
+        log.debug(s"oldActorRef is: $oldActorRef, actorId is: $actorId")
         oldActorRef ! PoisonPill
         actorId match {
           case DB_WRITER_ACTOR_ID =>
             writerActors -= oldActorRef
             actorIdToRefMap -= actorId
-            val newActorRef = context.actorOf(WriterActor.props(new CarCatLoggerDBImpl), DB_WRITER_ACTOR_ID)
+            val newActorRef = context.actorOf(WriterActor.props(new CarCatLoggerDBImpl).withDispatcher("blocking-io-dispatcher"), DB_WRITER_ACTOR_ID)
             writerActors += (newActorRef -> actorId)
             actorIdToRefMap += (actorId -> newActorRef)
           case FILE_WRITER_ACTOR_ID =>
             writerActors -= oldActorRef
             actorIdToRefMap -= actorId
-            val newActorRef = context.actorOf(WriterActor.props(new CarCatLoggerFileImpl), FILE_WRITER_ACTOR_ID)
+            val newActorRef = context.actorOf(WriterActor.props(new CarCatLoggerFileImpl).withDispatcher("blocking-io-dispatcher"), FILE_WRITER_ACTOR_ID)
             writerActors += (newActorRef -> actorId)
             actorIdToRefMap += (actorId -> newActorRef)
         }
@@ -136,12 +130,12 @@ class SupervisorActor extends Actor with Stash with Timers with ActorLogging {
       context.unbecome()
 
     case Queue(actorId, msg) => {
-      log.info(s"Queue2(actorId, msg) actorId is: $actorId, msg is: $msg")
+      log.debug(s"Queue2(actorId, msg) actorId is: $actorId, msg is: $msg")
       actorIdToRefMap.get(actorId).map(entry => entry ! LoggingActor.Queue(msg))
     }
 
     case Flush(actorId) => {
-      log.info(s"inside Flush2(actorId, msg) : actorId is: $actorId")
+      log.debug(s"inside Flush2(actorId, msg) : actorId is: $actorId")
       actorIdToRefMap.get(actorId).map(entry => entry ! LoggingActor.Flush)
     }
 

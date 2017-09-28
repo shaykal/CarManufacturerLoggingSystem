@@ -17,8 +17,8 @@ object LoggingSystem {
 
     Thread.sleep(2000)
 
-    supervisorActor ! Queue(LOGGING_ACTOR_FILE_ID, "test123")
-    supervisorActor ! Flush(LOGGING_ACTOR_FILE_ID)
+    supervisorActor ! Queue(FILE_WRITER_ACTOR_ID, "test123")
+    supervisorActor ! Flush(FILE_WRITER_ACTOR_ID)
 
 
     //supervisorActor ! Queue(LOGGING_ACTOR_DB_ID, "test345")

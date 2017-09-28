@@ -26,13 +26,13 @@ class WriterActor(logger: CarCatLogger) extends Actor with ActorLogging{
     // TODO put correct dispatcher for non blocking
   override def receive: Receive = {
     case Write(messagesList: Seq[Any]) => {
-      log.info(s"inside Write(id) messagesList is: $messagesList")
+      log.debug(s"inside Write(id) messagesList is: $messagesList")
       logger.writeMessages(messagesList)
     }
 
 
     case HeartBeat(id) => {
-      log.info(s"inside HeartBeat(id) id is: $id")
+      log.debug(s"inside HeartBeat(id) id is: $id")
       sender() ! Alive(id)
     }
   }
